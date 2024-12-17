@@ -1,0 +1,41 @@
+#include <stdio.h>
+
+#define MAX_PROCESSES 5
+
+int main() {
+    int n, quantum;
+    int burst_time[MAX_PROCESSES], arrival_time[MAX_PROCESSES];
+    int waiting_time[MAX_PROCESSES], turnaround_time[MAX_PROCESSES];
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+    printf("Enter quantum: ");
+    scanf("%d", &quantum);
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter burst time for process %d: ", i + 1);
+        scanf("%d", &burst_time[i]);
+        printf("Enter arrival time for process %d: ", i + 1);
+        scanf("%d", &arrival_time[i]);
+    }
+
+    int time = 0;
+    for (int i = 0; i < n; i++) {
+        if (arrival_time[i] > time) time = arrival_time[i];
+        int executed = 0;
+        while (executed < burst_time[i]) {
+            int executed_in_quantum = (executed + quantum <= burst_time[i]) ? quantum : burst_time[i] - executed;
+            executed += executed_in_quantum;
+            time += executed_in_quantum;
+            if (executed < burst_time[i]) waiting_time[i] += quantum;
+        }
+        turnaround_time[i] = time - arrival_time[i];
+    }
+
+    printf("\nProcess\tBurst Time\tArrival Time\tWaiting Time\tTurnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", i + 1, burst_time[i], arrival_time[i], waiting_time[i], turnaround_time[i]);
+    }
+
+    return 0;
+}
