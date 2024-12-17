@@ -1,0 +1,49 @@
+#include <stdio.h>
+
+int main() {
+    int n;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    int burstTime[n], waitingTime[n], turnaroundTime[n], totalWaitingTime = 0, totalTurnaroundTime = 0;
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter burst time for Process %d: ", i + 1);
+        scanf("%d", &burstTime[i]);
+    }
+
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (burstTime[i] > burstTime[j]) {
+                int temp = burstTime[i];
+                burstTime[i] = burstTime[j];
+                burstTime[j] = temp;
+            }
+        }
+    }
+
+    waitingTime[0] = 0; // The first process has no waiting time
+    for (int i = 1; i < n; i++) {
+        waitingTime[i] = waitingTime[i - 1] + burstTime[i - 1];
+    }
+
+    for (int i = 0; i < n; i++) {
+        turnaroundTime[i] = waitingTime[i] + burstTime[i];
+    }
+
+    printf("\nProcess ID | Burst Time | Waiting Time | Turnaround Time\n");
+    printf("------------------------------------------------------------\n");
+    for (int i = 0; i < n; i++) {
+        printf("%10d | %10d | %12d | %15d\n", i + 1, burstTime[i], waitingTime[i], turnaroundTime[i]);
+        totalWaitingTime += waitingTime[i];
+        totalTurnaroundTime += turnaroundTime[i];
+    }
+
+    float avgWaitingTime = (float)totalWaitingTime / n;
+    float avgTurnaroundTime = (float)totalTurnaroundTime / n;
+    printf("\nAverage Waiting Time = %.2f\n", avgWaitingTime);
+    printf("Average Turnaround Time = %.2f\n", avgTurnaroundTime);
+
+    return 0;
+}
