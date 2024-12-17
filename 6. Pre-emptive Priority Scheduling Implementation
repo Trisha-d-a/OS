@@ -1,0 +1,54 @@
+#include <stdio.h>
+
+int main() {
+    int n;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    int burstTime[n], priority[n], waitingTime[n], turnaroundTime[n], remainingTime[n];
+    int totalWaitingTime = 0, totalTurnaroundTime = 0, completed = 0, time = 0, minPriority, currentProcess;
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter burst time for Process %d: ", i + 1);
+        scanf("%d", &burstTime[i]);
+        remainingTime[i] = burstTime[i];
+        printf("Enter priority for Process %d (lower number means higher priority): ", i + 1);
+        scanf("%d", &priority[i]);
+    }
+
+    while (completed < n) {
+        minPriority = 1000;  // A large number to find the minimum priority
+        currentProcess = -1;
+
+        for (int i = 0; i < n; i++) {
+            if (remainingTime[i] > 0 && priority[i] < minPriority) {
+                minPriority = priority[i];
+                currentProcess = i;
+            }
+        }
+
+        if (currentProcess != -1) {
+            remainingTime[currentProcess]--;
+            time++;
+
+            if (remainingTime[currentProcess] == 0) {
+                completed++;
+                waitingTime[currentProcess] = time - burstTime[currentProcess];
+                turnaroundTime[currentProcess] = waitingTime[currentProcess] + burstTime[currentProcess];
+                totalWaitingTime += waitingTime[currentProcess];
+                totalTurnaroundTime += turnaroundTime[currentProcess];
+            }
+        }
+    }
+
+    printf("\nID | Burst Time | Priority | Waiting Time | Turnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%2d | %10d | %8d | %12d | %15d\n", i + 1, burstTime[i], priority[i], waitingTime[i], turnaroundTime[i]);
+    }
+
+    printf("\nAvg Waiting Time = %.2f\nAvg Turnaround Time = %.2f\n",
+           (float)totalWaitingTime / n, (float)totalTurnaroundTime / n);
+
+    return 0;
+}
