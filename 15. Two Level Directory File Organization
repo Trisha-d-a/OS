@@ -1,0 +1,117 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_SUBDIRS 5
+#define MAX_FILES 5
+#define MAX_FILENAME 50
+#define MAX_SUBDIRNAME 50
+
+typedef struct {
+    char filename[MAX_FILENAME];
+} File;
+
+typedef struct {
+    char subdirName[MAX_SUBDIRNAME];
+    File files[MAX_FILES];
+    int fileCount;
+} Subdirectory;
+
+typedef struct {
+    Subdirectory subdirs[MAX_SUBDIRS];
+    int subdirCount;
+} RootDirectory;
+
+void initRootDirectory(RootDirectory* root) { root->subdirCount = 0; }
+
+void createSubdirectory(RootDirectory* root, const char* name) {
+    if (root->subdirCount < MAX_SUBDIRS) {
+        strcpy(root->subdirs[root->subdirCount].subdirName, name);
+        root->subdirs[root->subdirCount++].fileCount = 0;
+        printf("Subdirectory '%s' created.\n", name);
+    } else printf("Root full!\n");
+}
+
+void addFileToSubdirectory(RootDirectory* root, const char* subdirName, const char* filename) {
+    for (int i = 0; i < root->subdirCount; i++) {
+        if (strcmp(root->subdirs[i].subdirName, subdirName) == 0) {
+            if (root->subdirs[i].fileCount < MAX_FILES) {
+                strcpy(root->subdirs[i].files[root->subdirs[i].fileCount++].filename, filename);
+                printf("File '%s' added.\n", filename);
+                return;
+            }
+            printf("Subdir full!\n");
+            return;
+        }
+    }
+    printf("Subdir not found!\n");
+}
+
+void deleteFileFromSubdirectory(RootDirectory* root, const char* subdirName, const char* filename) {
+    for (int i = 0; i < root->subdirCount; i++) {
+        if (strcmp(root->subdirs[i].subdirName, subdirName) == 0) {
+            for (int j = 0; j < root->subdirs[i].fileCount; j++) {
+                if (strcmp(root->subdirs[i].files[j].filename, filename) == 0) {
+                    for (int k = j; k < root->subdirs[i].fileCount - 1; k++)
+                        strcpy(root->subdirs[i].files[k].filename, root->subdirs[i].files[k + 1].filename);
+                    root->subdirs[i].fileCount--;
+                    printf("File '%s' deleted.\n", filename);
+                    return;
+                }
+            }
+            printf("File not found!\n");
+            return;
+        }
+    }
+    printf("Subdir not found!\n");
+}
+
+void listFilesInSubdirectory(const RootDirectory* root, const char* subdirName) {
+    for (int i = 0; i < root->subdirCount; i++) {
+        if (strcmp(root->subdirs[i].subdirName, subdirName) == 0) {
+            if (root->subdirs[i].fileCount == 0) printf("No files.\n");
+            else for (int j = 0; j < root->subdirs[i].fileCount; j++) 
+                printf("%s\n", root->subdirs[i].files[j].filename);
+            return;
+        }
+    }
+    printf("Subdir not found!\n");
+}
+
+void listSubdirectories(const RootDirectory* root) {
+    if (root->subdirCount == 0) printf("No subdirs.\n");
+    else for (int i = 0; i < root->subdirCount; i++) 
+        printf("%s\n", root->subdirs[i].subdirName);
+}
+
+int main() {
+    RootDirectory root; 
+    int choice; 
+    char subdirName[MAX_SUBDIRNAME], filename[MAX_FILENAME];
+    
+    initRootDirectory(&root);
+    
+    while (1) {
+        printf("\n1. Create Subdir\n2. Add File\n3. Delete File\n4. List Files\n5. List Subdirs\n6. Exit\nChoice: ");
+        scanf("%d", &choice); getchar();
+        
+        switch (choice) {
+            case 1: 
+                printf("Subdir name: "); fgets(subdirName, MAX_SUBDIRNAME, stdin); subdirName[strcspn(subdirName, "\n")] = 0;
+                createSubdirectory(&root, subdirName); break;
+            case 2: 
+                printf("Subdir name: "); fgets(subdirName, MAX_SUBDIRNAME, stdin); subdirName[strcspn(subdirName, "\n")] = 0;
+                printf("File name: "); fgets(filename, MAX_FILENAME, stdin); filename[strcspn(filename, "\n")] = 0;
+                addFileToSubdirectory(&root, subdirName, filename); break;
+            case 3: 
+                printf("Subdir name: "); fgets(subdirName, MAX_SUBDIRNAME, stdin); subdirName[strcspn(subdirName, "\n")] = 0;
+                printf("File name: "); fgets(filename, MAX_FILENAME, stdin); filename[strcspn(filename, "\n")] = 0;
+                deleteFileFromSubdirectory(&root, subdirName, filename); break;
+            case 4: 
+                printf("Subdir name: "); fgets(subdirName, MAX_SUBDIRNAME, stdin); subdirName[strcspn(subdirName, "\n")] = 0;
+                listFilesInSubdirectory(&root, subdirName); break;
+            case 5: listSubdirectories(&root); break;
+            case 6: return 0;
+            default: printf("Invalid choice.\n");
+        }
+    }
+}
