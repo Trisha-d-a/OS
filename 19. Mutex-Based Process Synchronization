@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <pthread.h>
+
+#define NUM_THREADS 5
+#define INCREMENT_COUNT 1000000
+
+pthread_mutex_t lock;  // Mutex lock
+int counter = 0;  // Shared counter variable
+
+// Thread function that increments the counter
+void* incrementCounter(void* arg) {
+    for (int i = 0; i < INCREMENT_COUNT; i++) {
+        pthread_mutex_lock(&lock);  // Lock the mutex
+        counter++;  // Critical section
+        pthread_mutex_unlock(&lock);  // Unlock the mutex
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+    
+    // Initialize the mutex
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        printf("Mutex initialization failed\n");
+        return 1;
+    }
+
+    // Create threads
+    for (int i = 0; i < NUM_THREADS; i++) {
+        if (pthread_create(&threads[i], NULL, incrementCounter, NULL) != 0) {
+            printf("Error creating thread %d\n", i);
+            return 1;
+        }
+    }
+
+    // Wait for all threads to complete
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    // Destroy the mutex
+    pthread_mutex_destroy(&lock);
+
+    // Print the final value of the counter
+    printf("Final counter value: %d\n", counter);
+    
+    return 0;
+}
