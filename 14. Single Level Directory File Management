@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_FILES 10
+#define MAX_FILENAME 50
+
+typedef struct {
+    char files[MAX_FILES][MAX_FILENAME];
+    int fileCount;
+} Directory;
+
+void initDirectory(Directory* dir) { dir->fileCount = 0; }
+
+void addFile(Directory* dir, const char* filename) {
+    if (dir->fileCount < MAX_FILES) {
+        strcpy(dir->files[dir->fileCount++], filename);
+        printf("Added: %s\n", filename);
+    } else {
+        printf("Directory full!\n");
+    }
+}
+
+void deleteFile(Directory* dir, const char* filename) {
+    for (int i = 0; i < dir->fileCount; i++) {
+        if (strcmp(dir->files[i], filename) == 0) {
+            for (int j = i; j < dir->fileCount - 1; j++) {
+                strcpy(dir->files[j], dir->files[j + 1]);
+            }
+            dir->fileCount--;
+            printf("Deleted: %s\n", filename);
+            return;
+        }
+    }
+    printf("File not found!\n");
+}
+
+void listFiles(const Directory* dir) {
+    if (dir->fileCount == 0) printf("No files.\n");
+    else for (int i = 0; i < dir->fileCount; i++) printf("%s\n", dir->files[i]);
+}
+
+int main() {
+    Directory dir;
+    int choice;
+    char filename[MAX_FILENAME];
+    initDirectory(&dir);
+
+    while (1) {
+        printf("\n1. Add File\n2. Delete File\n3. List Files\n4. Exit\nChoice: ");
+        scanf("%d", &choice);
+        getchar();  // Consume newline
+
+        switch (choice) {
+            case 1: 
+                printf("Enter filename: "); fgets(filename, MAX_FILENAME, stdin);
+                filename[strcspn(filename, "\n")] = 0; // Remove newline
+                addFile(&dir, filename);
+                break;
+            case 2: 
+                printf("Enter filename: "); fgets(filename, MAX_FILENAME, stdin);
+                filename[strcspn(filename, "\n")] = 0; // Remove newline
+                deleteFile(&dir, filename);
+                break;
+            case 3: listFiles(&dir); break;
+            case 4: return 0;
+            default: printf("Invalid choice.\n");
+        }
+    }
+    return 0;
+}
