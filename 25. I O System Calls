@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
+int main() {
+    int fd = open("example.txt", O_CREAT | O_RDWR, 0644);
+    if (fd == -1) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    // fcntl: Get and set file descriptor flags
+    int flags = fcntl(fd, F_GETFL);
+    fcntl(fd, F_SETFL, O_NONBLOCK);
+    printf("File flags: %d\n", flags);
+
+    // lseek: Move file pointer and read
+    lseek(fd, 0, SEEK_SET);
+    write(fd, "Hello, UNIX!", 13);
+    lseek(fd, 0, SEEK_SET);
+    char buffer[100];
+    ssize_t bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+    buffer[bytesRead] = '\0';
+    printf("File content: %s\n", buffer);
+
+    // stat: Get file info
+    struct stat fileInfo;
+    stat("example.txt", &fileInfo);
+    printf("File size: %ld bytes\n", fileInfo.st_size);
+
+    // opendir and readdir: List files in the current directory
+    DIR *dir = opendir(".");
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+        printf("%s\n", entry->d_name);
+    closedir(dir);
+
+    close(fd);
+    return 0;
+}
