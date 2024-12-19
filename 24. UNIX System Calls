@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+int main() {
+    int fd;
+    char buffer[100] = "Hello, UNIX!";
+
+    // Open/Create file with write permissions in current directory
+    fd = open("example.txt", O_CREAT | O_RDWR, 0644);
+    if (fd == -1) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    // Write content to file
+    write(fd, buffer, sizeof(buffer));
+    close(fd);
+
+    // Open file for reading
+    fd = open("example.txt", O_RDONLY);
+    if (fd == -1) {
+        perror("Error opening file for reading");
+        return 1;
+    }
+
+    // Read and display content
+    ssize_t bytesRead = read(fd, buffer, sizeof(buffer) - 1);
+    buffer[bytesRead] = '\0';
+    printf("File content: %s\n", buffer);
+
+    // Delete file
+    close(fd);
+    unlink("example.txt");
+    printf("File deleted.\n");
+
+    return 0;
+}
