@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+int main() {
+    pid_t pid1, pid2;
+
+    // (i) Create a process using fork()
+    pid1 = fork();
+    if (pid1 < 0) {
+        perror("Failed to create process 1");
+        return 1;
+    }
+
+    if (pid1 == 0) { // Child Process (Simulating a thread)
+        printf("Process 1 is executing\n");
+        exit(0);  // (iv) Exit from child process
+    }
+
+    // (ii) Join the child process (wait for it to finish)
+    waitpid(pid1, NULL, 0);  // Parent process waits for child process
+
+    printf("Process 1 has finished execution\n");
+
+    // (iii) Compare if two processes are the same
+    pid2 = fork(); // Create another process (simulating another thread)
+    if (pid2 < 0) {
+        perror("Failed to create process 2");
+        return 1;
+    }
+
+    if (pid2 == 0) { // Child process
+        printf("Process 2 is executing\n");
+        exit(0);
+    }
+
+    // Check if both process IDs are the same
+    if (pid1 == pid2) {
+        printf("Process 1 and Process 2 are the same\n");
+    } else {
+        printf("Process 1 and Process 2 are different\n");
+    }
+
+    // (iv) Exit the parent process
+    waitpid(pid2, NULL, 0);  // Wait for the second child process to finish
+    printf("Parent process has finished execution\n");
+
+    return 0;
+}
