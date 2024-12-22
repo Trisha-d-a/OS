@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_BLOCKS 5
+#define BLOCK_SIZE 100
+
+// Structure for a file block
+typedef struct Block {
+    int block_no;
+    char data[BLOCK_SIZE];
+    struct Block* next;
+} Block;
+
+int main() {
+    Block* first_block = NULL, *prev = NULL;
+    int block_id;
+
+    // Create and link blocks
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        Block* current = (Block*)malloc(sizeof(Block));
+        current->block_no = i + 1;
+        snprintf(current->data, sizeof(current->data), "Data in Block %d", i + 1);
+        current->next = NULL;
+        if (prev) prev->next = current;
+        else first_block = current;
+        prev = current;
+    }
+
+    // Simulate file access
+    printf("Enter block number to read (1 to %d): ", MAX_BLOCKS);
+    scanf("%d", &block_id);
+
+    Block* current = first_block;
+    while (current) {
+        if (current->block_no == block_id) {
+            printf("Block %d: %s\n", current->block_no, current->data);
+            break;
+        }
+        current = current->next;
+    }
+
+    if (!current) printf("Block not found.\n");
+
+    // Free memory
+    current = first_block;
+    while (current) {
+        Block* temp = current;
+        current = current->next;
+        free(temp);
+    }
+
+    return 0;
+}
