@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <fcntl.h>  // For O_CREAT
+#include <sys/mman.h>
+
+#define BUFFER_SIZE 5
+int buffer[BUFFER_SIZE];
+int in = 0, out = 0;
+sem_t *empty, *full;
+
+int main() {
+    // Open semaphores with proper flags
+    empty = sem_open("/empty", O_CREAT | O_EXCL, 0666, BUFFER_SIZE);
+    full = sem_open("/full", O_CREAT | O_EXCL, 0666, 0);
+
+    // Check for errors
+    if (empty == SEM_FAILED || full == SEM_FAILED) {
+        perror("sem_open");
+        exit(1);
+    }
+
+    pid_t pid = fork();  // Fork for producer and consumer
+
+    if (pid > 0) { // Parent process (Producer)
+        while (1) {
+            int item = rand() % 100;  // Produce an item
+            sem_wait(empty);  // Wait for an empty slot
+            buffer[in] = item;
+            printf("Produced: %d\n", item);
+            in = (in + 1) % BUFFER_SIZE;  // Move in pointer
+            sem_post(full);  // Signal that an item is available
+            sleep(1);  // Simulate production time
+        }
+    } else { // Child process (Consumer)
+        while (1) {
+            sem_wait(full);  // Wait for an item to consume
+            int item = buffer[out];
+            printf("Consumed: %d\n", item);
+            out = (out + 1) % BUFFER_SIZE;  // Move out pointer
+            sem_post(empty);  // Signal that a space is available
+            sleep(2);  // Simulate consumption time
+        }
+    }
+
+    // Close and unlink semaphores
+    sem_close(empty);
+    sem_close(full);
+    sem_unlink("/empty");
+    sem_unlink("/full");
+
+    return 0;
+}
