@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_REQUESTS 5
+
+int main() {
+    int requests[MAX_REQUESTS], initial_head, total_movement = 0, direction;
+    printf("Enter initial head position: ");
+    scanf("%d", &initial_head);
+
+    printf("Enter %d disk requests: \n", MAX_REQUESTS);
+    for (int i = 0; i < MAX_REQUESTS; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    printf("Enter direction (0 for left, 1 for right): ");
+    scanf("%d", &direction);
+
+    // Sort requests
+    for (int i = 0; i < MAX_REQUESTS - 1; i++) {
+        for (int j = i + 1; j < MAX_REQUESTS; j++) {
+            if (requests[i] > requests[j]) {
+                int temp = requests[i];
+                requests[i] = requests[j];
+                requests[j] = temp;
+            }
+        }
+    }
+
+    int head_index = 0;
+    for (int i = 0; i < MAX_REQUESTS; i++) {
+        if (requests[i] >= initial_head) {
+            head_index = i;
+            break;
+        }
+    }
+
+    // C-SCAN movement calculation
+    if (direction == 1) {
+        for (int i = head_index; i < MAX_REQUESTS; i++) total_movement += abs(requests[i] - (i > 0 ? requests[i-1] : initial_head));
+        total_movement += abs(requests[MAX_REQUESTS-1] - 0);
+        for (int i = 0; i < head_index; i++) total_movement += abs(requests[i] - requests[i+1]);
+    } else {
+        for (int i = head_index - 1; i >= 0; i--) total_movement += abs(requests[i] - (i < MAX_REQUESTS - 1 ? requests[i+1] : initial_head));
+        total_movement += abs(requests[0] - requests[MAX_REQUESTS-1]);
+        for (int i = MAX_REQUESTS-1; i > head_index; i--) total_movement += abs(requests[i] - requests[i-1]);
+    }
+
+    printf("Total head movement: %d\n", total_movement);
+    return 0;
+}
