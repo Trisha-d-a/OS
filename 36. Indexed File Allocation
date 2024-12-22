@@ -1,0 +1,48 @@
+#include <stdio.h>
+
+#define MAX_BLOCKS 5
+#define BLOCK_SIZE 100
+
+// Structure to represent a file with data blocks and an index block
+typedef struct {
+    int block_no;
+    char data[BLOCK_SIZE];  // Data stored in the block
+} Block;
+
+// Structure to represent the index block
+typedef struct {
+    int block_pointers[MAX_BLOCKS];  // Pointers to data blocks
+} IndexBlock;
+
+int main() {
+    Block file_blocks[MAX_BLOCKS];    // File data blocks
+    IndexBlock index_block;           // Index block
+    
+    // Initialize the file blocks with some data
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        file_blocks[i].block_no = i + 1;
+        snprintf(file_blocks[i].data, sizeof(file_blocks[i].data), "Data in Block %d", i + 1);
+    }
+
+    // Initialize the index block with pointers to file blocks
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        index_block.block_pointers[i] = i;  // Point to each file block
+    }
+
+    printf("Simulating indexed file allocation...\n");
+
+    int block_id;
+    printf("Enter block number to read (1 to %d): ", MAX_BLOCKS);
+    scanf("%d", &block_id);
+
+    // Simulate indexed file access
+    if (block_id <= 0 || block_id > MAX_BLOCKS) {
+        printf("Invalid block number.\n");
+    } else {
+        // Access the specified block using the index block
+        int index = index_block.block_pointers[block_id - 1];
+        printf("Block %d: %s\n", file_blocks[index].block_no, file_blocks[index].data);
+    }
+
+    return 0;
+}
